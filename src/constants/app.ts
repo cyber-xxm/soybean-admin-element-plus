@@ -6,8 +6,7 @@ export const GLOBAL_SIDER_MENU_ID = '__GLOBAL_SIDER_MENU__';
 
 export const themeSchemaRecord: Record<UnionKey.ThemeScheme, App.I18n.I18nKey> = {
   light: 'theme.themeSchema.light',
-  dark: 'theme.themeSchema.dark',
-  auto: 'theme.themeSchema.auto'
+  dark: 'theme.themeSchema.dark'
 };
 
 export const themeSchemaOptions = transformRecordToOption(themeSchemaRecord);
@@ -16,8 +15,7 @@ export const loginModuleRecord: Record<UnionKey.LoginModule, App.I18n.I18nKey> =
   'pwd-login': 'page.login.pwdLogin.title',
   'code-login': 'page.login.codeLogin.title',
   register: 'page.login.register.title',
-  'reset-pwd': 'page.login.resetPwd.title',
-  'bind-wechat': 'page.login.bindWeChat.title'
+  'reset-pwd': 'page.login.resetPwd.title'
 };
 
 export const themeLayoutModeRecord: Record<UnionKey.ThemeLayoutMode, App.I18n.I18nKey> = {

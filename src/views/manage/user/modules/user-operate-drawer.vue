@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useForm, useFormRules } from '@/hooks/common/form';
-import { fetchGetAllRoles } from '@/service/api';
-import { $t } from '@/locales';
 import { enableStatusOptions, userGenderOptions } from '@/constants/business';
+import { fetchGetAllRoles } from '@/service/api';
+import { useForm, useFormRules } from '@/hooks/common/form';
+import { $t } from '@/locales';
 
 defineOptions({ name: 'UserOperateDrawer' });
 
@@ -39,14 +39,14 @@ const title = computed(() => {
 
 type Model = Pick<
   Api.SystemManage.User,
-  'userName' | 'userGender' | 'nickName' | 'userPhone' | 'userEmail' | 'userRoles' | 'status'
+  'username' | 'userGender' | 'nickName' | 'userPhone' | 'userEmail' | 'userRoles' | 'status'
 >;
 
 const model = ref(createDefaultModel());
 
 function createDefaultModel(): Model {
   return {
-    userName: '',
+    username: '',
     userGender: undefined,
     nickName: '',
     userPhone: '',
@@ -56,10 +56,10 @@ function createDefaultModel(): Model {
   };
 }
 
-type RuleKey = Extract<keyof Model, 'userName' | 'status'>;
+type RuleKey = Extract<keyof Model, 'username' | 'status'>;
 
 const rules: Record<RuleKey, App.Global.FormRule> = {
-  userName: defaultRequiredRule,
+  username: defaultRequiredRule,
   status: defaultRequiredRule
 };
 
@@ -119,8 +119,8 @@ watch(visible, () => {
 <template>
   <ElDrawer v-model="visible" :title="title" :size="360">
     <ElForm ref="formRef" :model="model" :rules="rules" label-position="top">
-      <ElFormItem :label="$t('page.manage.user.userName')" prop="userName">
-        <ElInput v-model="model.userName" :placeholder="$t('page.manage.user.form.userName')" />
+      <ElFormItem :label="$t('page.manage.user.username')" prop="username">
+        <ElInput v-model="model.username" :placeholder="$t('page.manage.user.form.username')" />
       </ElFormItem>
       <ElFormItem :label="$t('page.manage.user.userGender')" prop="userGender">
         <ElRadioGroup v-model="model.userGender">

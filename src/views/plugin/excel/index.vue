@@ -15,7 +15,7 @@ const { columns, data, loading } = useTable({
     current: 1,
     size: 999,
     status: undefined,
-    userName: undefined,
+    username: undefined,
     userGender: undefined,
     nickName: undefined,
     userPhone: undefined,
@@ -24,7 +24,7 @@ const { columns, data, loading } = useTable({
   columns: () => [
     { type: 'selection', width: 48 },
     { prop: 'index', label: $t('common.index'), width: 64 },
-    { prop: 'userName', label: $t('page.manage.user.userName'), minWidth: 100 },
+    { prop: 'username', label: $t('page.manage.user.username'), minWidth: 100 },
     {
       prop: 'userGender',
       label: $t('page.manage.user.userGender'),

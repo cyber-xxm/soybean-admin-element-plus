@@ -411,7 +411,7 @@ declare namespace App {
         login: {
           common: {
             loginOrRegister: string;
-            userNamePlaceholder: string;
+            usernamePlaceholder: string;
             phonePlaceholder: string;
             codePlaceholder: string;
             passwordPlaceholder: string;
@@ -428,7 +428,7 @@ declare namespace App {
             rememberMe: string;
             forgetPassword: string;
             register: string;
-            otherAccountLogin: string;
+            slogan: string;
             otherLoginMode: string;
             superAdmin: string;
             admin: string;
@@ -574,7 +574,7 @@ declare namespace App {
           };
           user: {
             title: string;
-            userName: string;
+            username: string;
             userGender: string;
             nickName: string;
             userPhone: string;
@@ -582,7 +582,7 @@ declare namespace App {
             userStatus: string;
             userRole: string;
             form: {
-              userName: string;
+              username: string;
               userGender: string;
               nickName: string;
               userPhone: string;
@@ -669,7 +669,7 @@ declare namespace App {
       };
       form: {
         required: string;
-        userName: FormMsg;
+        username: FormMsg;
         phone: FormMsg;
         pwd: FormMsg;
         confirmPwd: FormMsg;
@@ -745,6 +745,7 @@ declare namespace App {
 
     /** The backend service response data */
     type Response<T = unknown> = {
+      success: boolean;
       /** The backend service response code */
       code: string;
       /** The backend service response message */

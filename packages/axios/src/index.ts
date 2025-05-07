@@ -1,5 +1,5 @@
-import axios, { AxiosError } from 'axios';
 import type { AxiosResponse, CreateAxiosDefaults, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError } from 'axios';
 import axiosRetry from 'axios-retry';
 import { nanoid } from '@sa/utils';
 import { createAxiosConfig, createDefaultOptions, createRetryOptions } from './options';
@@ -43,9 +43,7 @@ function createCommonRequest<ResponseData = any>(
     }
 
     // handle config by hook
-    const handledConfig = opts.onRequest?.(config) || config;
-
-    return handledConfig;
+    return opts.onRequest?.(config) || config;
   });
 
   instance.interceptors.response.use(

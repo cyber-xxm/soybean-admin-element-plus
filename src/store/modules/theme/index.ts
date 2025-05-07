@@ -1,10 +1,10 @@
 import { computed, effectScope, onScopeDispose, ref, toRefs, watch } from 'vue';
 import type { Ref } from 'vue';
+import { useEventListener } from '@vueuse/core';
 import { defineStore } from 'pinia';
-import { useEventListener, usePreferredColorScheme } from '@vueuse/core';
 import { getPaletteColorByNumber } from '@sa/color';
-import { SetupStoreId } from '@/enum';
 import { localStg } from '@/utils/storage';
+import { SetupStoreId } from '@/enum';
 import {
   addThemeVarsToGlobal,
   createThemeToken,
@@ -17,16 +17,12 @@ import {
 /** Theme store */
 export const useThemeStore = defineStore(SetupStoreId.Theme, () => {
   const scope = effectScope();
-  const osTheme = usePreferredColorScheme();
 
   /** Theme settings */
   const settings: Ref<App.Theme.ThemeSetting> = ref(initThemeSettings());
 
   /** Dark mode */
   const darkMode = computed(() => {
-    if (settings.value.themeScheme === 'auto') {
-      return osTheme.value === 'dark';
-    }
     return settings.value.themeScheme === 'dark';
   });
 
@@ -93,7 +89,7 @@ export const useThemeStore = defineStore(SetupStoreId.Theme, () => {
 
   /** Toggle theme scheme */
   function toggleThemeScheme() {
-    const themeSchemes: UnionKey.ThemeScheme[] = ['light', 'dark', 'auto'];
+    const themeSchemes: UnionKey.ThemeScheme[] = ['light', 'dark'];
 
     const index = themeSchemes.findIndex(item => item === settings.value.themeScheme);
 

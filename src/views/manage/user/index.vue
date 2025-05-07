@@ -1,9 +1,9 @@
 <script setup lang="tsx">
 import { ElButton, ElPopconfirm, ElTag } from 'element-plus';
-import { fetchGetUserList } from '@/service/api';
-import { $t } from '@/locales';
 import { enableStatusRecord, userGenderRecord } from '@/constants/business';
+import { fetchGetUserList } from '@/service/api';
 import { useTable, useTableOperate } from '@/hooks/common/table';
+import { $t } from '@/locales';
 import UserOperateDrawer from './modules/user-operate-drawer.vue';
 import UserSearch from './modules/user-search.vue';
 
@@ -26,7 +26,7 @@ const {
     current: 1,
     size: 10,
     status: undefined,
-    userName: undefined,
+    username: undefined,
     userGender: undefined,
     nickName: undefined,
     userPhone: undefined,
@@ -35,7 +35,7 @@ const {
   columns: () => [
     { type: 'selection', width: 48 },
     { prop: 'index', label: $t('common.index'), width: 64 },
-    { prop: 'userName', label: $t('page.manage.user.userName'), minWidth: 100 },
+    { prop: 'username', label: $t('page.manage.user.username'), minWidth: 100 },
     {
       prop: 'userGender',
       label: $t('page.manage.user.userGender'),
