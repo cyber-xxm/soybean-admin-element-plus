@@ -13,7 +13,7 @@ declare module 'vue-router' {
      *
      * It's used in i18n, if it is set, the title will be ignored
      */
-    i18nKey?: App.I18n.I18nKey | null;
+    i18n_key?: App.I18n.I18nKey | null;
     /**
      * Roles of the route
      *
@@ -23,7 +23,7 @@ declare module 'vue-router' {
      */
     roles?: string[];
     /** Whether to cache the route */
-    keepAlive?: boolean | undefined;
+    keep_alive?: boolean | undefined;
     /**
      * Is constant route
      *
@@ -49,7 +49,7 @@ declare module 'vue-router' {
     /** The outer link of the route */
     href?: string | null;
     /** Whether to hide the route in the menu */
-    hideInMenu?: boolean | undefined;
+    hide_menu?: boolean | undefined;
     /**
      * The menu key will be activated when entering the route
      *
@@ -58,12 +58,12 @@ declare module 'vue-router' {
      * @example
      *   the route is "user_detail", if it is set to "user_list", the menu "user_list" will be activated
      */
-    activeMenu?: import('@elegant-router/types').RouteKey | undefined;
+    active_menu?: import('@elegant-router/types').RouteKey | undefined;
     /**
      * By default, the same route path will use one tab, even with different query, if set true, the route with
      * different query will use different tabs
      */
-    multiTab?: boolean | undefined;
+    multi_tab?: boolean | undefined;
     /** If set, the route will be fixed in tabs, and the value is the order of fixed tabs */
     fixedIndexInTab?: number | undefined;
     /** if set query parameters, it will be automatically carried when entering the route */

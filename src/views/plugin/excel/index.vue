@@ -8,29 +8,29 @@ import { $t } from '@/locales';
 
 defineOptions({ name: 'ExcelPage' });
 
-const { columns, data, loading } = useTable({
+const { columns, list, loading } = useTable({
   apiFn: fetchGetUserList,
   showTotal: true,
   apiParams: {
     current: 1,
-    size: 999,
+    page_size: 999,
     status: undefined,
-    userName: undefined,
-    userGender: undefined,
-    nickName: undefined,
-    userPhone: undefined,
-    userEmail: undefined
+    username: undefined,
+    gender: undefined,
+    name: undefined,
+    phone: undefined,
+    email: undefined
   },
   columns: () => [
     { type: 'selection', width: 48 },
     { prop: 'index', label: $t('common.index'), width: 64 },
-    { prop: 'userName', label: $t('page.manage.user.userName'), minWidth: 100 },
+    { prop: 'username', label: $t('page.manage.user.username'), minWidth: 100 },
     {
-      prop: 'userGender',
+      prop: 'gender',
       label: $t('page.manage.user.userGender'),
       width: 100,
       formatter: row => {
-        if (row.userGender === undefined) {
+        if (row.gender === undefined) {
           return '';
         }
 
@@ -39,9 +39,9 @@ const { columns, data, loading } = useTable({
           2: 'danger'
         };
 
-        const label = $t(userGenderRecord[row.userGender]);
+        const label = $t(userGenderRecord[row.gender]);
 
-        return <ElTag type={tagMap[row.userGender]}>{label}</ElTag>;
+        return <ElTag type={tagMap[row.gender]}>{label}</ElTag>;
       }
     },
     { prop: 'nickName', label: $t('page.manage.user.nickName'), minWidth: 100 },
@@ -72,7 +72,7 @@ const { columns, data, loading } = useTable({
 function exportExcel() {
   const exportColumns = columns.value.slice(2);
 
-  const excelList = data.value.map(item => exportColumns.map(col => getTableValue(col, item)));
+  const excelList = list.value.map(item => exportColumns.map(col => getTableValue(col, item)));
 
   const titleList = exportColumns.map(col => (isTableColumnHasTitle(col) && col.label) || undefined);
 
@@ -105,16 +105,16 @@ function getTableValue(
     return '';
   }
 
-  if (prop === 'userRoles') {
-    return item.userRoles.map(role => role).join(',');
+  if (prop === 'role') {
+    return item.roles.map(role => role).join(',');
   }
 
   if (prop === 'status') {
     return (item.status && $t(enableStatusRecord[item.status])) || undefined;
   }
 
-  if (prop === 'userGender') {
-    return (item.userGender && $t(userGenderRecord[item.userGender])) || undefined;
+  if (prop === 'gender') {
+    return (item.gender && $t(userGenderRecord[item.gender])) || undefined;
   }
 
   if (prop in item) {
@@ -150,7 +150,7 @@ function isTableColumnHasTitle<T>(column: UI.TableColumn<T>): column is UI.Table
         </div>
       </template>
       <div class="h-[calc(100%-50px)]">
-        <ElTable v-loading="loading" height="100%" border class="sm:h-full" :data="data" row-key="id">
+        <ElTable v-loading="loading" height="100%" border class="sm:h-full" :data="list" row-key="id">
           <ElTableColumn v-for="col in columns" :key="col.prop" v-bind="col" />
         </ElTable>
       </div>

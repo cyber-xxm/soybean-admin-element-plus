@@ -1,7 +1,7 @@
 import type { RouteLocationNormalizedLoaded, RouteRecordRaw, _RouteRecordBase } from 'vue-router';
 import type { ElegantConstRoute, LastLevelRouteKey, RouteKey, RouteMap } from '@elegant-router/types';
-import { $t } from '@/locales';
 import { useSvgIcon } from '@/hooks/common/icon';
+import { $t } from '@/locales';
 
 /**
  * Filter auth routes by roles
@@ -77,10 +77,10 @@ export function getGlobalMenusByAuthRoutes(routes: ElegantConstRoute[]) {
   const menus: App.Global.Menu[] = [];
 
   routes.forEach(route => {
-    if (!route.meta?.hideInMenu) {
+    if (!route.meta?.hide_menu) {
       const menu = getGlobalMenuByBaseRoute(route);
 
-      if (route.children?.some(child => !child.meta?.hideInMenu)) {
+      if (route.children?.some(child => !child.meta?.hide_menu)) {
         menu.children = getGlobalMenusByAuthRoutes(route.children);
       }
 
@@ -128,14 +128,14 @@ function getGlobalMenuByBaseRoute(route: RouteLocationNormalizedLoaded | Elegant
   const { SvgIconVNode } = useSvgIcon();
 
   const { name, path } = route;
-  const { title, i18nKey, icon = import.meta.env.VITE_MENU_ICON, localIcon, iconFontSize } = route.meta ?? {};
+  const { title, i18n_key, icon = import.meta.env.VITE_MENU_ICON, localIcon, iconFontSize } = route.meta ?? {};
 
-  const label = i18nKey ? $t(i18nKey) : title!;
+  const label = i18n_key ? $t(i18n_key) : title!;
 
   const menu: App.Global.Menu = {
     key: name as string,
     label,
-    i18nKey,
+    i18nKey: i18n_key,
     routeKey: name as RouteKey,
     routePath: path as RouteMap[RouteKey],
     icon: SvgIconVNode({ icon, localIcon, fontSize: iconFontSize || 20 })
@@ -155,7 +155,7 @@ export function getCacheRouteNames(routes: RouteRecordRaw[]) {
   routes.forEach(route => {
     // only get last two level route, which has component
     route.children?.forEach(child => {
-      if (child.component && child.meta?.keepAlive) {
+      if (child.component && child.meta?.keep_alive) {
         cacheNames.push(child.name as LastLevelRouteKey);
       }
     });
@@ -284,7 +284,7 @@ export function getBreadcrumbsByRoute(
   menus: App.Global.Menu[]
 ): App.Global.Breadcrumb[] {
   const key = route.name as string;
-  const activeKey = route.meta?.activeMenu;
+  const activeKey = route.meta?.active_menu;
 
   for (const menu of menus) {
     if (menu.key === key) {

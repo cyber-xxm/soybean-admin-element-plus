@@ -31,7 +31,7 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
   const {
     loading,
     empty,
-    data,
+    list,
     columns,
     columnChecks,
     reloadColumns,
@@ -44,12 +44,12 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
     apiParams,
     columns: config.columns,
     transformer: res => {
-      const { records = [], current = 1, size = 10, total = 0 } = res.data || {};
+      const { data = [], current = 1, page_size = 10, total = 0 } = res.data || {};
 
       // Ensure that the size is greater than 0, If it is less than 0, it will cause paging calculation errors.
-      const pageSize = size <= 0 ? 10 : size;
+      const pageSize = page_size <= 0 ? 10 : page_size;
 
-      const recordsWithIndex = records.map((item, index) => {
+      const recordsWithIndex = data.map((item, index) => {
         return {
           ...item,
           index: (current - 1) * pageSize + index + 1
@@ -57,9 +57,9 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
       });
 
       return {
-        data: recordsWithIndex,
-        pageNum: current,
-        pageSize,
+        list: recordsWithIndex,
+        current,
+        page_size: pageSize,
         total
       };
     },
@@ -117,11 +117,11 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
       return filteredColumns;
     },
     onFetched: async transformed => {
-      const { pageNum, pageSize, total } = transformed;
+      const { current, page_size, total } = transformed;
 
       updatePagination({
-        currentPage: pageNum,
-        pageSize,
+        currentPage: current,
+        pageSize: page_size,
         total
       });
     },
@@ -135,7 +135,7 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
     'current-change': (page: number) => {
       pagination.currentPage = page;
 
-      updateSearchParams({ current: page, size: pagination.pageSize! });
+      updateSearchParams({ current: page, page_size: pagination.pageSize! });
 
       getData();
 
@@ -145,7 +145,7 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
       pagination.currentPage = 1;
       pagination.pageSize = pageSize;
 
-      updateSearchParams({ current: pagination.currentPage, size: pageSize });
+      updateSearchParams({ current: pagination.currentPage, page_size: pageSize });
 
       getData();
       return true;
@@ -178,7 +178,7 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
 
     updateSearchParams({
       current: pageNum,
-      size: pagination.pageSize!
+      page_size: pagination.pageSize!
     });
 
     await getData();
@@ -200,7 +200,7 @@ export function useTable<A extends UI.TableApiFn>(config: UI.NaiveTableConfig<A>
   return {
     loading,
     empty,
-    data,
+    list,
     columns,
     columnChecks,
     reloadColumns,

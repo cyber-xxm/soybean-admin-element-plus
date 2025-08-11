@@ -5,9 +5,7 @@ import type { RequestInstanceState } from './type';
 
 export function getAuthorization() {
   const token = localStg.get('token');
-  const Authorization = token ? `Bearer ${token}` : null;
-
-  return Authorization;
+  return token ? `Bearer ${token}` : null;
 }
 
 /** refresh token */
@@ -18,7 +16,7 @@ async function handleRefreshToken() {
   const { error, data } = await fetchRefreshToken(rToken);
   if (!error) {
     localStg.set('token', data.token);
-    localStg.set('refreshToken', data.refreshToken);
+    localStg.set('refreshToken', data.refresh_token);
     return true;
   }
 

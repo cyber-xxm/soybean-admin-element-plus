@@ -72,12 +72,10 @@ export function useMenu() {
   const { routerPushByKeyWithMetaQuery } = useRouterPush();
 
   const selectedKey = computed(() => {
-    const { hideInMenu, activeMenu } = route.meta;
+    const { hide_menu, active_menu } = route.meta;
     const name = route.name as string;
 
-    const routeName = (hideInMenu ? activeMenu : name) || name;
-
-    return routeName;
+    return (hide_menu ? active_menu : name) || name;
   });
 
   const selectedKeyDummy = ref(selectedKey.value);

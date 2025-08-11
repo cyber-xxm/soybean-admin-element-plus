@@ -85,14 +85,12 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
     // the route is captured by the "not-found" route because the constant route is not initialized
     // after the constant route is initialized, redirect to the original route
     const path = to.fullPath;
-    const location: RouteLocationRaw = {
+    return {
       path,
       replace: true,
       query: to.query,
       hash: to.hash
     };
-
-    return location;
   }
 
   const isLogin = Boolean(localStg.get('token'));
@@ -100,7 +98,7 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
   if (!isLogin) {
     // if the user is not logged in and the route is a constant route but not the "not-found" route, then it is allowed to access.
     if (to.meta.constant && !isNotFoundRoute) {
-      routeStore.onRouteSwitchWhenNotLoggedIn();
+      await routeStore.onRouteSwitchWhenNotLoggedIn();
 
       return null;
     }
@@ -109,12 +107,10 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
     const loginRoute: RouteKey = 'login';
     const query = getRouteQueryOfLoginRoute(to, routeStore.routeHome);
 
-    const location: RouteLocationRaw = {
+    return {
       name: loginRoute,
       query
     };
-
-    return location;
   }
 
   if (!routeStore.isInitAuthRoute) {
@@ -127,18 +123,16 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
       const rootRoute: RouteKey = 'root';
       const path = to.redirectedFrom?.name === rootRoute ? '/' : to.fullPath;
 
-      const location: RouteLocationRaw = {
+      return {
         path,
         replace: true,
         query: to.query,
         hash: to.hash
       };
-
-      return location;
     }
   }
 
-  routeStore.onRouteSwitchWhenLoggedIn();
+  await routeStore.onRouteSwitchWhenLoggedIn();
 
   // the auth route is initialized
   // it is not the "not-found" route, then it is allowed to access
@@ -151,11 +145,9 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
   const noPermissionRoute: RouteKey = '403';
 
   if (exist) {
-    const location: RouteLocationRaw = {
+    return {
       name: noPermissionRoute
     };
-
-    return location;
   }
 
   return null;

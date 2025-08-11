@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { computed, ref, watch } from 'vue';
 import { enableStatusOptions, menuIconTypeOptions, menuTypeOptions } from '@/constants/business';
-import { fetchGetAllRoles } from '@/service/api';
+import { createMenu, updateMenu } from '@/service/api';
 import { useForm, useFormRules } from '@/hooks/common/form';
 import { getLocalIcons } from '@/utils/icon';
 import { $t } from '@/locales';
@@ -13,6 +13,7 @@ import {
   getRoutePathWithParam,
   transformLayoutAndPageToComponent
 } from './shared';
+import { useLoading } from '~/packages/hooks';
 
 defineOptions({ name: 'MenuOperateModal' });
 
@@ -42,6 +43,8 @@ const visible = defineModel<boolean>('visible', {
 const { formRef, validate, restoreValidation } = useForm();
 const { defaultRequiredRule } = useFormRules();
 
+const menuId = computed(() => props.rowData?.id || '');
+
 const title = computed(() => {
   const titles: Record<OperateType, string> = {
     add: $t('page.manage.menu.addMenu'),
@@ -53,69 +56,71 @@ const title = computed(() => {
 
 type Model = Pick<
   Api.SystemManage.Menu,
-  | 'menuType'
-  | 'menuName'
-  | 'routeName'
-  | 'routePath'
+  | 'menu_type'
+  | 'menu_name'
+  | 'route_name'
+  | 'route_path'
   | 'component'
   | 'order'
-  | 'i18nKey'
+  | 'i18n_key'
   | 'icon'
-  | 'iconType'
+  | 'icon_type'
   | 'status'
-  | 'parentId'
-  | 'keepAlive'
+  | 'parent_id'
+  | 'keep_alive'
   | 'constant'
   | 'href'
-  | 'hideInMenu'
-  | 'activeMenu'
-  | 'multiTab'
+  | 'hide_menu'
+  | 'active_menu'
+  | 'multi_tab'
   | 'fixedIndexInTab'
 > & {
   query: NonNullable<Api.SystemManage.Menu['query']>;
   buttons: NonNullable<Api.SystemManage.Menu['buttons']>;
   layout: string;
   page: string;
-  pathParam: string;
+  path_param: string;
 };
+
+const { startLoading, endLoading } = useLoading();
 
 const model = ref(createDefaultModel());
 
 function createDefaultModel(): Model {
   return {
-    menuType: '1',
-    menuName: '',
-    routeName: '',
-    routePath: '',
-    pathParam: '',
+    menu_type: 1,
+    menu_name: '',
+    route_name: '',
+    route_path: '',
+    path_param: '',
     component: '',
     layout: '',
     page: '',
-    i18nKey: null,
+    i18n_key: null,
     icon: '',
-    iconType: '1',
-    parentId: 0,
-    status: '1',
-    keepAlive: false,
+    icon_type: 1,
+    parent_id: '',
+    status: 1,
+    keep_alive: false,
     constant: false,
     order: 0,
     href: null,
-    hideInMenu: false,
-    activeMenu: undefined,
-    multiTab: false,
+    hide_menu: false,
+    active_menu: undefined,
+    multi_tab: false,
     fixedIndexInTab: undefined,
     query: [],
     buttons: []
   };
 }
 
-type RuleKey = Extract<keyof Model, 'menuName' | 'status' | 'routeName' | 'routePath'>;
+type RuleKey = Extract<keyof Model, 'menu_name' | 'status' | 'route_name' | 'route_path'>;
 
 const rules: Record<RuleKey, App.Global.FormRule> = {
-  menuName: defaultRequiredRule,
+  menu_name: defaultRequiredRule,
   status: defaultRequiredRule,
-  routeName: defaultRequiredRule,
-  routePath: defaultRequiredRule
+  route_name: defaultRequiredRule,
+  route_path: defaultRequiredRule
 };
 
 const disabledMenuType = computed(() => props.operateType === 'edit');
@@ -131,15 +136,15 @@ const localIconOptions = localIcons.map(item => ({
   value: item
 }));
 
-const showLayout = computed(() => model.value.parentId === 0);
+const showLayout = computed(() => model.value.parent_id === '');
 
-const showPage = computed(() => model.value.menuType === '2');
+const showPage = computed(() => model.value.menu_type === 2);
 
 const pageOptions = computed(() => {
   const allPages = [...props.allPages];
 
-  if (model.value.routeName && !allPages.includes(model.value.routeName)) {
-    allPages.unshift(model.value.routeName);
+  if (model.value.route_name && !allPages.includes(model.value.route_name)) {
+    allPages.unshift(model.value.route_name);
   }
 
   const opts: CommonType.Option[] = allPages.map(page => ({
@@ -156,19 +161,19 @@ const layoutOptions: CommonType.Option[] = [
 ];
 
 /** the enabled role options */
-const roleOptions = ref<CommonType.Option<string>[]>([]);
+// const roleOptions = ref<CommonType.Option<string>[]>([]);
 
 async function getRoleOptions() {
-  const { error, data } = await fetchGetAllRoles();
-
-  if (!error) {
-    const options = data.map(item => ({
-      label: item.roleName,
-      value: item.roleCode
-    }));
-
-    roleOptions.value = [...options];
-  }
+  // const { error, data } = await fetchGetAllRoles();
+  //
+  // if (!error) {
+  //   const options = data.map(item => ({
+  //     label: item.name,
+  //     value: item.roleCode
+  //   }));
+  //
+  //   roleOptions.value = [...options];
+  // }
 }
 
 /** - add a query input */
@@ -199,16 +204,16 @@ function handleInitModel() {
   if (props.operateType === 'addChild') {
     const { id } = props.rowData;
 
-    Object.assign(model.value, { parentId: id });
+    Object.assign(model.value, { parent_id: id });
   }
 
   if (props.operateType === 'edit') {
     const { component, ...rest } = props.rowData;
 
     const { layout, page } = getLayoutAndPage(component);
-    const { path, param } = getPathParamFromRoutePath(rest.routePath);
+    const { path, param } = getPathParamFromRoutePath(rest.route_path);
 
-    Object.assign(model.value, rest, { layout, page, routePath: path, pathParam: param });
+    Object.assign(model.value, rest, { layout, page, route_path: path, path_param: param });
   }
 
   if (!model.value.query) {
@@ -224,29 +229,29 @@ function closeDrawer() {
 }
 
 function handleUpdateRoutePathByRouteName() {
-  if (model.value.routeName) {
-    model.value.routePath = getRoutePathByRouteName(model.value.routeName);
+  if (model.value.route_name) {
+    model.value.route_path = getRoutePathByRouteName(model.value.route_name);
   } else {
-    model.value.routePath = '';
+    model.value.route_path = '';
   }
 }
 
 function handleUpdateI18nKeyByRouteName() {
-  if (model.value.routeName) {
-    model.value.i18nKey = `route.${model.value.routeName}` as App.I18n.I18nKey;
+  if (model.value.route_name) {
+    model.value.i18n_key = `route.${model.value.route_name}` as App.I18n.I18nKey;
   } else {
-    model.value.i18nKey = null;
+    model.value.i18n_key = null;
   }
 }
 
 function getSubmitParams() {
-  const { layout, page, pathParam, ...params } = model.value;
+  const { layout, page, path_param, ...params } = model.value;
 
   const component = transformLayoutAndPageToComponent(layout, page);
-  const routePath = getRoutePathWithParam(model.value.routePath, pathParam);
+  const routePath = getRoutePathWithParam(model.value.route_path, path_param);
 
   params.component = component;
-  params.routePath = routePath;
+  params.route_path = routePath;
 
   return params;
 }
@@ -256,13 +261,24 @@ async function handleSubmit() {
 
   const params = getSubmitParams();
 
-  // eslint-disable-next-line no-console
-  console.log('params: ', params);
-
+  await validate();
   // request
-  window.$message?.success($t('common.updateSuccess'));
-  closeDrawer();
-  emit('submitted');
+  startLoading();
+
+  const { error } =
+    props.operateType !== 'edit'
+      ? await createMenu(params as Api.SystemManage.Menu)
+      : await updateMenu(menuId.value, params as Api.SystemManage.Menu);
+
+  if (!error) {
+    window.$message?.success(props.operateType !== 'edit' ? $t('common.addSuccess') : $t('common.updateSuccess'));
+    closeDrawer();
+    emit('submitted');
+  } else {
+    window.$message?.error(props.operateType !== 'edit' ? $t('common.addFailed') : $t('common.updateFailed'));
+  }
+
+  endLoading();
 }
 
 watch(visible, () => {
@@ -274,7 +290,7 @@ watch(visible, () => {
 });
 
 watch(
-  () => model.value.routeName,
+  () => model.value.route_name,
   () => {
     handleUpdateRoutePathByRouteName();
     handleUpdateI18nKeyByRouteName();
@@ -289,7 +305,7 @@ watch(
         <ElRow>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.menuType')" prop="menuType">
-              <ElRadioGroup v-model="model.menuType" :disabled="disabledMenuType">
+              <ElRadioGroup v-model="model.menu_type" :disabled="disabledMenuType">
                 <ElRadio
                   v-for="item in menuTypeOptions"
                   :key="item.value"
@@ -301,22 +317,22 @@ watch(
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.menuName')" prop="menuName">
-              <ElInput v-model="model.menuName" :placeholder="$t('page.manage.menu.form.menuName')" />
+              <ElInput v-model="model.menu_name" :placeholder="$t('page.manage.menu.form.menuName')" />
             </ElFormItem>
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.routeName')" prop="routeName">
-              <ElInput v-model="model.routeName" :placeholder="$t('page.manage.menu.form.routeName')" />
+              <ElInput v-model="model.route_name" :placeholder="$t('page.manage.menu.form.routeName')" />
             </ElFormItem>
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.routePath')" prop="routePath">
-              <ElInput v-model="model.routePath" disabled :placeholder="$t('page.manage.menu.form.routePath')" />
+              <ElInput v-model="model.route_path" disabled :placeholder="$t('page.manage.menu.form.routePath')" />
             </ElFormItem>
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.pathParam')" prop="pathParam">
-              <ElInput v-model="model.pathParam" :placeholder="$t('page.manage.menu.form.pathParam')" />
+              <ElInput v-model="model.path_param" :placeholder="$t('page.manage.menu.form.pathParam')" />
             </ElFormItem>
           </ElCol>
           <ElCol v-if="showLayout" :span="12">
@@ -340,7 +356,7 @@ watch(
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.i18nKey')" prop="i18nKey">
-              <ElInput v-model="model.i18nKey" :placeholder="$t('page.manage.menu.form.i18nKey')" />
+              <ElInput v-model="model.i18n_key" :placeholder="$t('page.manage.menu.form.i18nKey')" />
             </ElFormItem>
           </ElCol>
           <ElCol :span="12">
@@ -350,7 +366,7 @@ watch(
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.iconTypeTitle')" prop="iconType">
-              <ElRadioGroup v-model="model.iconType">
+              <ElRadioGroup v-model="model.icon_type">
                 <ElRadio
                   v-for="item in menuIconTypeOptions"
                   :key="item.value"
@@ -362,14 +378,14 @@ watch(
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.icon')" prop="icon">
-              <template v-if="model.iconType === '1'">
+              <template v-if="model.icon_type === 1">
                 <ElInput v-model="model.icon" :placeholder="$t('page.manage.menu.form.icon')" class="flex-1">
                   <template #suffix>
                     <SvgIcon v-if="model.icon" :icon="model.icon" class="text-icon" />
                   </template>
                 </ElInput>
               </template>
-              <template v-if="model.iconType === '2'">
+              <template v-if="model.icon_type === 2">
                 <ElSelect
                   v-model="model.icon"
                   :placeholder="$t('page.manage.menu.form.localIcon')"
@@ -392,7 +408,7 @@ watch(
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.keepAlive')" prop="keepAlive">
-              <ElRadioGroup v-model="model.keepAlive">
+              <ElRadioGroup v-model="model.keep_alive">
                 <ElRadio :value="true" :label="$t('common.yesOrNo.yes')" />
                 <ElRadio :value="false" :label="$t('common.yesOrNo.no')" />
               </ElRadioGroup>
@@ -413,16 +429,16 @@ watch(
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.hideInMenu')" prop="hideInMenu">
-              <ElRadioGroup v-model="model.hideInMenu">
+              <ElRadioGroup v-model="model.hide_menu">
                 <ElRadio :value="true" :label="$t('common.yesOrNo.yes')" />
                 <ElRadio :value="false" :label="$t('common.yesOrNo.no')" />
               </ElRadioGroup>
             </ElFormItem>
           </ElCol>
-          <ElCol v-if="model.hideInMenu" :span="12">
+          <ElCol v-if="model.hide_menu" :span="12">
             <ElFormItem :label="$t('page.manage.menu.activeMenu')" prop="activeMenu">
               <ElSelect
-                v-model="model.activeMenu"
+                v-model="model.active_menu"
                 :options="pageOptions"
                 clearable
                 :placeholder="$t('page.manage.menu.form.activeMenu')"
@@ -433,7 +449,7 @@ watch(
           </ElCol>
           <ElCol :span="12">
             <ElFormItem :label="$t('page.manage.menu.multiTab')" prop="multiTab">
-              <ElRadioGroup v-model="model.multiTab">
+              <ElRadioGroup v-model="model.multi_tab">
                 <ElRadio :value="true" :label="$t('common.yesOrNo.yes')" />
                 <ElRadio :value="false" :label="$t('common.yesOrNo.no')" />
               </ElRadioGroup>

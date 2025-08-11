@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useForm, useFormRules } from '@/hooks/common/form';
-import { fetchGetAllRoles } from '@/service/api';
-import { $t } from '@/locales';
 import { enableStatusOptions, userGenderOptions } from '@/constants/business';
+import { createUser, fetchGetRoleList, updateUser } from '@/service/api';
+import { useForm, useFormRules } from '@/hooks/common/form';
+import { $t } from '@/locales';
+import { useLoading } from '~/packages/hooks';
 
 defineOptions({ name: 'UserOperateDrawer' });
+
+const { startLoading, endLoading } = useLoading();
 
 interface Props {
   /** the type of operation */
@@ -15,6 +18,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const userId = computed(() => props.rowData?.id || '');
 
 interface Emits {
   (e: 'submitted'): void;
@@ -37,49 +42,51 @@ const title = computed(() => {
   return titles[props.operateType];
 });
 
-type Model = Pick<
-  Api.SystemManage.User,
-  'userName' | 'userGender' | 'nickName' | 'userPhone' | 'userEmail' | 'userRoles' | 'status'
->;
+type Model = Pick<Api.SystemManage.User, 'username' | 'gender' | 'name' | 'phone' | 'email' | 'roles' | 'status'>;
 
 const model = ref(createDefaultModel());
 
 function createDefaultModel(): Model {
   return {
-    userName: '',
-    userGender: undefined,
-    nickName: '',
-    userPhone: '',
-    userEmail: '',
-    userRoles: [],
+    username: '',
+    gender: undefined,
+    name: '',
+    phone: '',
+    email: '',
+    roles: [],
     status: undefined
   };
 }
 
-type RuleKey = Extract<keyof Model, 'userName' | 'status'>;
+const rolesIds = ref<string[]>([]);
+
+type RuleKey = Extract<keyof Model, 'username' | 'status'>;
 
 const rules: Record<RuleKey, App.Global.FormRule> = {
-  userName: defaultRequiredRule,
+  username: defaultRequiredRule,
   status: defaultRequiredRule
 };
 
 /** the enabled role options */
-const roleOptions = ref<CommonType.Option<string>[]>([]);
+const roleOptions = ref<CommonType.Option<any>[]>([]);
 
 async function getRoleOptions() {
-  const { error, data } = await fetchGetAllRoles();
+  const params = {
+    result_type: 'select'
+  };
+  const { error, data } = await fetchGetRoleList(params);
 
   if (!error) {
-    const options = data.map(item => ({
-      label: item.roleName,
-      value: item.roleCode
+    const options = data?.data.map(item => ({
+      label: item.name,
+      value: item.id
     }));
 
     // the mock data does not have the roleCode, so fill it
     // if the real request, remove the following code
-    const userRoleOptions = model.value.userRoles.map(item => ({
-      label: item,
-      value: item
+    const userRoleOptions = model.value.roles.map(item => ({
+      label: item.name,
+      value: item.id
     }));
     // end
 
@@ -91,7 +98,14 @@ function handleInitModel() {
   model.value = createDefaultModel();
 
   if (props.operateType === 'edit' && props.rowData) {
-    Object.assign(model.value, props.rowData);
+    // Object.assign(model.value, props.rowData);
+    model.value.name = props.rowData.name;
+    model.value.username = props.rowData.username;
+    model.value.gender = props.rowData.gender;
+    model.value.phone = props.rowData.phone;
+    model.value.email = props.rowData.email;
+    model.value.status = props.rowData.status;
+    rolesIds.value = props.rowData.roles.map(item => item.id);
   }
 }
 
@@ -102,9 +116,28 @@ function closeDrawer() {
 async function handleSubmit() {
   await validate();
   // request
-  window.$message?.success($t('common.updateSuccess'));
-  closeDrawer();
-  emit('submitted');
+  startLoading();
+  model.value.roles = rolesIds.value.map(id => {
+    const option = roleOptions.value.find(opt => opt.value === id);
+    return {
+      id,
+      name: option?.label || '未知角色'
+    } as Api.SystemManage.Role;
+  });
+  const { error } =
+    props.operateType === 'add'
+      ? await createUser(model.value as Api.SystemManage.User)
+      : await updateUser(userId.value, model.value as Api.SystemManage.User);
+
+  if (!error) {
+    window.$message?.success(props.operateType === 'add' ? $t('common.addSuccess') : $t('common.updateSuccess'));
+    closeDrawer();
+    emit('submitted');
+  } else {
+    window.$message?.error(props.operateType === 'add' ? $t('common.addFailed') : $t('common.updateFailed'));
+  }
+
+  endLoading();
 }
 
 watch(visible, () => {
@@ -117,24 +150,24 @@ watch(visible, () => {
 </script>
 
 <template>
-  <ElDrawer v-model="visible" :title="title" :size="360">
-    <ElForm ref="formRef" :model="model" :rules="rules" label-position="top">
-      <ElFormItem :label="$t('page.manage.user.userName')" prop="userName">
-        <ElInput v-model="model.userName" :placeholder="$t('page.manage.user.form.userName')" />
+  <ElDialog v-model="visible" :title="title" draggable preset="card" class="w-800px">
+    <ElForm ref="formRef" :model="model" :rules="rules" label-position="right" :label-width="100">
+      <ElFormItem :label="$t('page.manage.user.username')" prop="username">
+        <ElInput v-model="model.username" :placeholder="$t('page.manage.user.form.username')" />
       </ElFormItem>
-      <ElFormItem :label="$t('page.manage.user.userGender')" prop="userGender">
-        <ElRadioGroup v-model="model.userGender">
+      <ElFormItem :label="$t('page.manage.user.userGender')" prop="gender">
+        <ElRadioGroup v-model="model.gender">
           <ElRadio v-for="item in userGenderOptions" :key="item.value" :value="item.value" :label="$t(item.label)" />
         </ElRadioGroup>
       </ElFormItem>
-      <ElFormItem :label="$t('page.manage.user.nickName')" prop="nickName">
-        <ElInput v-model="model.nickName" :placeholder="$t('page.manage.user.form.nickName')" />
+      <ElFormItem :label="$t('page.manage.user.nickName')" prop="name">
+        <ElInput v-model="model.name" :placeholder="$t('page.manage.user.form.nickName')" />
       </ElFormItem>
-      <ElFormItem :label="$t('page.manage.user.userPhone')" prop="userPhone">
-        <ElInput v-model="model.userPhone" :placeholder="$t('page.manage.user.form.userPhone')" />
+      <ElFormItem :label="$t('page.manage.user.userPhone')" prop="phone">
+        <ElInput v-model="model.phone" :placeholder="$t('page.manage.user.form.userPhone')" />
       </ElFormItem>
       <ElFormItem :label="$t('page.manage.user.userEmail')" prop="email">
-        <ElInput v-model="model.userEmail" :placeholder="$t('page.manage.user.form.userEmail')" />
+        <ElInput v-model="model.email" :placeholder="$t('page.manage.user.form.userEmail')" />
       </ElFormItem>
       <ElFormItem :label="$t('page.manage.user.userStatus')" prop="status">
         <ElRadioGroup v-model="model.status">
@@ -142,7 +175,7 @@ watch(visible, () => {
         </ElRadioGroup>
       </ElFormItem>
       <ElFormItem :label="$t('page.manage.user.userRole')" prop="roles">
-        <ElSelect v-model="model.userRoles" multiple :placeholder="$t('page.manage.user.form.userRole')">
+        <ElSelect v-model="rolesIds" multiple :placeholder="$t('page.manage.user.form.userRole')">
           <ElOption v-for="{ label, value } in roleOptions" :key="value" :label="label" :value="value" />
         </ElSelect>
       </ElFormItem>
@@ -153,7 +186,7 @@ watch(visible, () => {
         <ElButton type="primary" @click="handleSubmit">{{ $t('common.confirm') }}</ElButton>
       </ElSpace>
     </template>
-  </ElDrawer>
+  </ElDialog>
 </template>
 
 <style scoped></style>

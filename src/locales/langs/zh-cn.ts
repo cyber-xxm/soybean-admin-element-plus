@@ -10,6 +10,7 @@ const local: App.I18n.Schema = {
     action: '操作',
     add: '新增',
     addSuccess: '添加成功',
+    addFailed: '添加失败',
     backToHome: '返回首页',
     batchDelete: '批量删除',
     cancel: '取消',
@@ -21,6 +22,7 @@ const local: App.I18n.Schema = {
     confirm: '确认',
     delete: '删除',
     deleteSuccess: '删除成功',
+    deleteFailed: '删除失败',
     confirmDelete: '确认删除吗？',
     edit: '编辑',
     warning: '警告',
@@ -32,6 +34,7 @@ const local: App.I18n.Schema = {
     lookForward: '敬请期待',
     modify: '修改',
     modifySuccess: '修改成功',
+    modifyFailed: '修改失败',
     noData: '无数据',
     operate: '操作',
     pleaseCheckValue: '请检查输入的值是否合法',
@@ -43,6 +46,7 @@ const local: App.I18n.Schema = {
     trigger: '触发',
     update: '更新',
     updateSuccess: '更新成功',
+    updateFailed: '更新失败',
     userCenter: '个人中心',
     yesOrNo: {
       yes: '是',
@@ -172,14 +176,9 @@ const local: App.I18n.Schema = {
     document_naive: 'Naive UI文档',
     document_antd: 'Ant Design Vue文档',
     'document_element-plus': 'Element Plus文档',
-    document_alova: 'Alova文档',
     'user-center': '个人中心',
     about: '关于',
     function: '系统功能',
-    alova: 'alova示例',
-    alova_request: 'alova请求',
-    alova_user: '用户列表',
-    alova_scenes: '场景化请求',
     function_tab: '标签页',
     'function_multi-tab': '多标签页',
     'function_hide-child': '隐藏子菜单',
@@ -190,6 +189,7 @@ const local: App.I18n.Schema = {
     'function_toggle-auth': '切换权限',
     'function_super-page': '超级管理员可见',
     manage: '系统管理',
+    manage_log: '日志管理',
     manage_user: '用户管理',
     'manage_user-detail': '用户详情',
     manage_role: '角色管理',
@@ -233,7 +233,7 @@ const local: App.I18n.Schema = {
     login: {
       common: {
         loginOrRegister: '登录 / 注册',
-        userNamePlaceholder: '请输入用户名',
+        usernamePlaceholder: '请输入用户名',
         phonePlaceholder: '请输入手机号',
         codePlaceholder: '请输入验证码',
         passwordPlaceholder: '请输入密码',
@@ -243,7 +243,7 @@ const local: App.I18n.Schema = {
         back: '返回',
         validateSuccess: '验证成功',
         loginSuccess: '登录成功',
-        welcomeBack: '欢迎回来，{userName} ！'
+        welcomeBack: '欢迎回来，{username} ！'
       },
       pwdLogin: {
         title: '密码登录',
@@ -292,7 +292,7 @@ const local: App.I18n.Schema = {
     home: {
       branchDesc:
         '为了方便大家开发和更新合并，我们对main分支的代码进行了精简，只保留了首页菜单，其余内容已移至example分支进行维护。预览地址显示的内容即为example分支的内容。',
-      greeting: '早安，{userName}, 今天又是充满活力的一天!',
+      greeting: '早安，{username}, 今天又是充满活力的一天!',
       weatherDesc: '今日多云转晴，20℃ - 25℃!',
       projectCount: '项目数',
       todo: '待办',
@@ -357,20 +357,6 @@ const local: App.I18n.Schema = {
         repeatedErrorMsg2: '自定义请求错误 2'
       }
     },
-    alova: {
-      scenes: {
-        captchaSend: '发送验证码',
-        autoRequest: '自动请求',
-        visibilityRequestTips: '浏览器窗口切换自动请求数据',
-        pollingRequestTips: '每3秒自动请求一次',
-        networkRequestTips: '网络重连后自动请求',
-        refreshTime: '更新时间',
-        startRequest: '开始请求',
-        stopRequest: '停止请求',
-        requestCrossComponent: '跨组件触发请求',
-        triggerAllRequest: '手动触发所有自动请求'
-      }
-    },
     manage: {
       common: {
         status: {
@@ -397,7 +383,7 @@ const local: App.I18n.Schema = {
       },
       user: {
         title: '用户列表',
-        userName: '用户名',
+        username: '用户名',
         userGender: '性别',
         nickName: '昵称',
         userPhone: '手机号',
@@ -405,7 +391,7 @@ const local: App.I18n.Schema = {
         userStatus: '用户状态',
         userRole: '用户角色',
         form: {
-          userName: '请输入用户名',
+          username: '请输入用户名',
           userGender: '请选择性别',
           nickName: '请输入昵称',
           userPhone: '请输入手机号',
@@ -492,7 +478,7 @@ const local: App.I18n.Schema = {
   },
   form: {
     required: '不能为空',
-    userName: {
+    username: {
       required: '请输入用户名',
       invalid: '用户名格式不正确'
     },

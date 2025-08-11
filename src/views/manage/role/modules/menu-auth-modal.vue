@@ -7,7 +7,7 @@ defineOptions({ name: 'MenuAuthModal' });
 
 interface Props {
   /** the roleId */
-  roleId: number;
+  roleId: string;
 }
 
 const props = defineProps<Props>();

@@ -10,18 +10,18 @@ declare namespace Api {
       /** current page number */
       current: number;
       /** page size */
-      size: number;
+      page_size: number;
       /** total count */
       total: number;
     }
 
     /** common params of paginating query list data */
     interface PaginatingQueryRecord<T = any> extends PaginatingCommonParams {
-      records: T[];
+      data: T[];
     }
 
     /** common search params of table */
-    type CommonSearchParams = Pick<Common.PaginatingCommonParams, 'current' | 'size'>;
+    type CommonSearchParams = Pick<Common.PaginatingCommonParams, 'current' | 'page_size'>;
 
     /**
      * enable status
@@ -29,20 +29,20 @@ declare namespace Api {
      * - "1": enabled
      * - "2": disabled
      */
-    type EnableStatus = '1' | '2';
+    type EnableStatus = 1 | 2;
 
     /** common record */
     type CommonRecord<T = any> = {
       /** record id */
-      id: number;
+      id: string;
       /** record creator */
       createBy: string;
       /** record create time */
-      createTime: string;
+      create_time: string;
       /** record updater */
       updateBy: string;
       /** record update time */
-      updateTime: string;
+      update_time: string;
       /** record status */
       status: EnableStatus | undefined;
     } & T;
@@ -56,12 +56,12 @@ declare namespace Api {
   namespace Auth {
     interface LoginToken {
       token: string;
-      refreshToken: string;
+      refresh_token: string;
     }
 
     interface UserInfo {
-      userId: string;
-      userName: string;
+      id: string;
+      username: string;
       roles: string[];
       buttons: string[];
     }
@@ -91,28 +91,28 @@ declare namespace Api {
    * backend api module: "systemManage"
    */
   namespace SystemManage {
-    type CommonSearchParams = Pick<Common.PaginatingCommonParams, 'current' | 'size'>;
+    type CommonSearchParams = Pick<Common.PaginatingCommonParams, 'current' | 'page_size'>;
 
     /** role */
     type Role = Common.CommonRecord<{
       /** role name */
-      roleName: string;
-      /** role code */
-      roleCode: string;
+      name: string;
       /** role description */
-      roleDesc: string;
+      description: string;
+      /** role result_type */
+      result_type: string;
     }>;
 
     /** role search params */
     type RoleSearchParams = CommonType.RecordNullable<
-      Pick<Api.SystemManage.Role, 'roleName' | 'roleCode' | 'status'> & CommonSearchParams
+      Pick<Api.SystemManage.Role, 'name' | 'description' | 'status' | 'result_type'> & CommonSearchParams
     >;
 
     /** role list */
     type RoleList = Common.PaginatingQueryRecord<Role>;
 
     /** all role */
-    type AllRole = Pick<Role, 'id' | 'roleName' | 'roleCode'>;
+    type AllRole = Pick<Role, 'id' | 'name' | 'description'>;
 
     /**
      * user gender
@@ -120,28 +120,27 @@ declare namespace Api {
      * - "1": "male"
      * - "2": "female"
      */
-    type UserGender = '1' | '2';
+    type UserGender = 1 | 2;
 
     /** user */
     type User = Common.CommonRecord<{
       /** user name */
-      userName: string;
+      username: string;
       /** user gender */
-      userGender: UserGender | undefined;
+      gender: UserGender | undefined;
       /** user nick name */
-      nickName: string;
+      name: string;
       /** user phone */
-      userPhone: string;
+      phone: string;
       /** user email */
-      userEmail: string;
+      email: string;
       /** user role code collection */
-      userRoles: string[];
+      roles: Role[];
     }>;
 
     /** user search params */
     type UserSearchParams = CommonType.RecordNullable<
-      Pick<Api.SystemManage.User, 'userName' | 'userGender' | 'nickName' | 'userPhone' | 'userEmail' | 'status'> &
-        CommonSearchParams
+      Pick<Api.SystemManage.User, 'username' | 'gender' | 'name' | 'phone' | 'email' | 'status'> & CommonSearchParams
     >;
 
     /** user list */
@@ -153,7 +152,7 @@ declare namespace Api {
      * - "1": directory
      * - "2": menu
      */
-    type MenuType = '1' | '2';
+    type MenuType = 1 | 2;
 
     type MenuButton = {
       /**
@@ -172,39 +171,39 @@ declare namespace Api {
      * - "1": iconify icon
      * - "2": local icon
      */
-    type IconType = '1' | '2';
+    type IconType = 1 | 2;
 
     type MenuPropsOfRoute = Pick<
       import('vue-router').RouteMeta,
-      | 'i18nKey'
-      | 'keepAlive'
+      | 'i18n_key'
+      | 'keep_alive'
       | 'constant'
       | 'order'
       | 'href'
-      | 'hideInMenu'
-      | 'activeMenu'
-      | 'multiTab'
+      | 'hide_menu'
+      | 'active_menu'
+      | 'multi_tab'
       | 'fixedIndexInTab'
       | 'query'
     >;
 
     type Menu = Common.CommonRecord<{
       /** parent menu id */
-      parentId: number;
+      parent_id: string;
       /** menu type */
-      menuType: MenuType;
+      menu_type: MenuType;
       /** menu name */
-      menuName: string;
+      menu_name: string;
       /** route name */
-      routeName: string;
+      route_name: string;
       /** route path */
-      routePath: string;
+      route_path: string;
       /** component */
       component?: string;
       /** iconify icon name or local icon name */
       icon: string;
       /** icon type */
-      iconType: IconType;
+      icon_type: IconType;
       /** buttons */
       buttons?: MenuButton[] | null;
       /** children menu */
@@ -216,9 +215,9 @@ declare namespace Api {
     type MenuList = Common.PaginatingQueryRecord<Menu>;
 
     type MenuTree = {
-      id: number;
+      id: string;
       label: string;
-      pId: number;
+      pId: string;
       children?: MenuTree[];
     };
   }

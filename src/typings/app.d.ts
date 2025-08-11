@@ -298,6 +298,7 @@ declare namespace App {
         action: string;
         add: string;
         addSuccess: string;
+        addFailed: string;
         backToHome: string;
         batchDelete: string;
         cancel: string;
@@ -309,6 +310,7 @@ declare namespace App {
         confirm: string;
         delete: string;
         deleteSuccess: string;
+        deleteFailed: string;
         confirmDelete: string;
         edit: string;
         warning: string;
@@ -320,6 +322,7 @@ declare namespace App {
         lookForward: string;
         modify: string;
         modifySuccess: string;
+        modifyFailed: string;
         noData: string;
         operate: string;
         pleaseCheckValue: string;
@@ -331,6 +334,7 @@ declare namespace App {
         trigger: string;
         update: string;
         updateSuccess: string;
+        updateFailed: string;
         userCenter: string;
         yesOrNo: {
           yes: string;
@@ -411,7 +415,7 @@ declare namespace App {
         login: {
           common: {
             loginOrRegister: string;
-            userNamePlaceholder: string;
+            usernamePlaceholder: string;
             phonePlaceholder: string;
             codePlaceholder: string;
             passwordPlaceholder: string;
@@ -534,20 +538,6 @@ declare namespace App {
             repeatedErrorMsg2: string;
           };
         };
-        alova: {
-          scenes: {
-            captchaSend: string;
-            autoRequest: string;
-            visibilityRequestTips: string;
-            pollingRequestTips: string;
-            networkRequestTips: string;
-            refreshTime: string;
-            startRequest: string;
-            stopRequest: string;
-            requestCrossComponent: string;
-            triggerAllRequest: string;
-          };
-        };
         manage: {
           common: {
             status: {
@@ -574,7 +564,7 @@ declare namespace App {
           };
           user: {
             title: string;
-            userName: string;
+            username: string;
             userGender: string;
             nickName: string;
             userPhone: string;
@@ -582,7 +572,7 @@ declare namespace App {
             userStatus: string;
             userRole: string;
             form: {
-              userName: string;
+              username: string;
               userGender: string;
               nickName: string;
               userPhone: string;
@@ -669,7 +659,7 @@ declare namespace App {
       };
       form: {
         required: string;
-        userName: FormMsg;
+        username: FormMsg;
         phone: FormMsg;
         pwd: FormMsg;
         confirmPwd: FormMsg;
@@ -745,6 +735,8 @@ declare namespace App {
 
     /** The backend service response data */
     type Response<T = unknown> = {
+      /** The backend service response success */
+      success: boolean;
       /** The backend service response code */
       code: string;
       /** The backend service response message */

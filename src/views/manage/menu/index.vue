@@ -5,7 +5,7 @@ import { ElButton, ElPopconfirm, ElTag } from 'element-plus';
 import { useBoolean } from '@sa/hooks';
 import { yesOrNoRecord } from '@/constants/common';
 import { enableStatusRecord, menuTypeRecord } from '@/constants/business';
-import { fetchGetAllPages, fetchGetMenuList } from '@/service/api';
+import { deleteMenu, fetchGetAllPages, fetchGetMenuList } from '@/service/api';
 import { useTable, useTableOperate } from '@/hooks/common/table';
 import { $t } from '@/locales';
 import SvgIcon from '@/components/custom/svg-icon.vue';
@@ -15,13 +15,13 @@ const { bool: visible, setTrue: openModal } = useBoolean();
 
 const wrapperRef = ref<HTMLElement | null>(null);
 
-const { columns, columnChecks, data, loading, pagination, getData, getDataByPage } = useTable({
+const { columns, columnChecks, list, loading, pagination, getData, getDataByPage } = useTable({
   apiFn: fetchGetMenuList,
   columns: () => [
     { type: 'selection', width: 48 },
-    { prop: 'id', label: $t('page.manage.menu.id') },
+    { prop: 'id', label: $t('page.manage.menu.id'), minWidth: 90 },
     {
-      prop: 'menuType',
+      prop: 'menu_type',
       label: $t('page.manage.menu.menuType'),
       width: 90,
       formatter: row => {
@@ -30,19 +30,19 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
           2: 'primary'
         };
 
-        const label = $t(menuTypeRecord[row.menuType]);
+        const label = $t(menuTypeRecord[row.menu_type]);
 
-        return <ElTag type={tagMap[row.menuType]}>{label}</ElTag>;
+        return <ElTag type={tagMap[row.menu_type]}>{label}</ElTag>;
       }
     },
     {
-      prop: 'menuName',
+      prop: 'menu_name',
       label: $t('page.manage.menu.menuName'),
-      minWidth: 120,
+      minWidth: 60,
       formatter: row => {
-        const { i18nKey, menuName } = row;
+        const { i18n_key, menu_name } = row;
 
-        const label = i18nKey ? $t(i18nKey) : menuName;
+        const label = i18n_key ? $t(i18n_key) : menu_name;
 
         return <span>{label}</span>;
       }
@@ -52,9 +52,9 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
       label: $t('page.manage.menu.icon'),
       width: 100,
       formatter: row => {
-        const icon = row.iconType === '1' ? row.icon : undefined;
+        const icon = row.icon_type === 1 ? row.icon : undefined;
 
-        const localIcon = row.iconType === '2' ? row.icon : undefined;
+        const localIcon = row.icon_type === 2 ? row.icon : undefined;
 
         return (
           <div class="flex-center">
@@ -63,8 +63,8 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
         );
       }
     },
-    { prop: 'routeName', label: $t('page.manage.menu.routeName'), minWidth: 120 },
-    { prop: 'routePath', label: $t('page.manage.menu.routePath'), minWidth: 120 },
+    { prop: 'route_name', label: $t('page.manage.menu.routeName'), minWidth: 100 },
+    { prop: 'route_path', label: $t('page.manage.menu.routePath'), minWidth: 100 },
     {
       prop: 'status',
       label: $t('page.manage.menu.menuStatus'),
@@ -85,11 +85,11 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
       }
     },
     {
-      prop: 'hideInMenu',
+      prop: 'hide_menu',
       label: $t('page.manage.menu.hideInMenu'),
       width: 80,
       formatter: row => {
-        const hide: CommonType.YesOrNo = row.hideInMenu ? 'Y' : 'N';
+        const hide: CommonType.YesOrNo = row.hide_menu ? 'Y' : 'N';
 
         const tagMap: Record<CommonType.YesOrNo, UI.ThemeColor> = {
           Y: 'danger',
@@ -101,15 +101,15 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
         return <ElTag type={tagMap[hide]}>{label}</ElTag>;
       }
     },
-    { prop: 'parentId', label: $t('page.manage.menu.parentId'), width: 90 },
+    { prop: 'parent_id', label: $t('page.manage.menu.parentId'), minWidth: 50 },
     { prop: 'order', label: $t('page.manage.menu.order'), width: 60 },
     {
       prop: 'operate',
       label: $t('common.operate'),
-      width: 270,
+      width: 240,
       formatter: row => (
         <div class="flex-center justify-end pr-10px">
-          {row.menuType === '1' && (
+          {row.menu_type === 1 && (
             <ElButton type="primary" plain size="small" onClick={() => handleAddChildMenu(row)}>
               {$t('page.manage.menu.addChildMenu')}
             </ElButton>
@@ -132,7 +132,7 @@ const { columns, columnChecks, data, loading, pagination, getData, getDataByPage
   ]
 });
 
-const { checkedRowKeys, onBatchDeleted, onDeleted } = useTableOperate(data, getData);
+const { checkedRowKeys, onBatchDeleted, onDeleted } = useTableOperate(list, getData);
 
 const operateType = ref<OperateType>('add');
 
@@ -147,12 +147,16 @@ async function handleBatchDelete() {
   onBatchDeleted();
 }
 
-function handleDelete(id: number) {
-  // eslint-disable-next-line no-console
-  console.log(id);
+async function handleDelete(id: string) {
   // request
+  const { error } = await deleteMenu(id);
 
-  onDeleted();
+  if (!error) {
+    window.$message?.success($t('common.deleteSuccess'));
+    await onDeleted();
+  } else {
+    window.$message?.error($t('common.deleteFailed'));
+  }
 }
 
 /** the edit menu data or the parent menu data when adding a child menu */
@@ -210,7 +214,7 @@ init();
           height="100%"
           border
           class="sm:h-full"
-          :data="data"
+          :data="list"
           row-key="id"
           @selection-change="checkedRowKeys = $event"
         >

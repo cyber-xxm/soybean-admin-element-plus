@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { ElButton, ElPopconfirm, ElTag } from 'element-plus';
 import { enableStatusRecord } from '@/constants/business';
-import { fetchGetRoleList } from '@/service/api';
+import { deleteRole, fetchGetRoleList } from '@/service/api';
 import { useTable, useTableOperate } from '@/hooks/common/table';
 import { $t } from '@/locales';
 import RoleOperateDrawer from './modules/role-operate-drawer.vue';
@@ -10,7 +10,7 @@ import RoleSearch from './modules/role-search.vue';
 const {
   columns,
   columnChecks,
-  data,
+  list,
   loading,
   getData,
   getDataByPage,
@@ -21,17 +21,17 @@ const {
   apiFn: fetchGetRoleList,
   apiParams: {
     current: 1,
-    size: 10,
+    page_size: 10,
     status: undefined,
-    roleName: undefined,
-    roleCode: undefined
+    name: undefined,
+    description: undefined,
+    result_type: undefined
   },
   columns: () => [
     { type: 'selection', width: 48 },
     { prop: 'index', label: $t('common.index'), width: 64 },
-    { prop: 'roleName', label: $t('page.manage.role.roleName'), minWidth: 120 },
-    { prop: 'roleCode', label: $t('page.manage.role.roleCode'), minWidth: 120 },
-    { prop: 'roleDesc', label: $t('page.manage.role.roleDesc'), minWidth: 120 },
+    { prop: 'name', label: $t('page.manage.role.roleName'), minWidth: 120 },
+    { prop: 'description', label: $t('page.manage.role.roleDesc'), minWidth: 120 },
     {
       prop: 'status',
       label: $t('page.manage.role.roleStatus'),
@@ -85,26 +85,32 @@ const {
   onBatchDeleted,
   onDeleted
   // closeDrawer
-} = useTableOperate(data, getData);
+} = useTableOperate(list, getData);
 
 async function handleBatchDelete() {
   // eslint-disable-next-line no-console
   console.log(checkedRowKeys.value);
   // request
-
-  onBatchDeleted();
+  const rows = checkedRowKeys.value;
+  rows.forEach(id => {
+    handleDelete(id);
+  });
+  await onBatchDeleted();
 }
 
-function handleDelete(id: number) {
+async function handleDelete(id: string) {
   // request
+  const { error } = await deleteRole(id);
 
-  // eslint-disable-next-line no-console
-  console.log(id);
-
-  onDeleted();
+  if (!error) {
+    window.$message?.success($t('common.deleteSuccess'));
+    await onDeleted();
+  } else {
+    window.$message?.error($t('common.deleteFailed'));
+  }
 }
 
-function edit(id: number) {
+function edit(id: string) {
   handleEdit(id);
 }
 </script>
@@ -132,7 +138,7 @@ function edit(id: number) {
           height="100%"
           border
           class="sm:h-full"
-          :data="data"
+          :data="list"
           row-key="id"
           @selection-change="checkedRowKeys = $event"
         >

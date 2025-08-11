@@ -25,12 +25,31 @@ export function transformRecordToOption<T extends Record<string, string>>(record
   })) as CommonType.Option<keyof T, T[keyof T]>[];
 }
 
+export function transformRecordToNumOption<T extends Record<number, string>>(record: T) {
+  return (Object.entries(record) as [keyof T, T[keyof T]][]).map(([value, label]) => ({
+    value: Number(value) as keyof T,
+    label
+  })) as CommonType.Option<keyof T, T[keyof T]>[];
+}
+
 /**
  * Translate options
  *
  * @param options
  */
 export function translateOptions(options: CommonType.Option<string, App.I18n.I18nKey>[]) {
+  return options.map(option => ({
+    ...option,
+    label: $t(option.label)
+  }));
+}
+
+/**
+ * Translate options
+ *
+ * @param options
+ */
+export function translateNumberOptions(options: CommonType.Option<number, App.I18n.I18nKey>[]) {
   return options.map(option => ({
     ...option,
     label: $t(option.label)

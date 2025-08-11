@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useBoolean } from '@sa/hooks';
+import { useBoolean, useLoading } from '@sa/hooks';
+import { enableStatusOptions } from '@/constants/business';
+import { createRole, updateRole } from '@/service/api';
 import { useForm, useFormRules } from '@/hooks/common/form';
 import { $t } from '@/locales';
-import { enableStatusOptions } from '@/constants/business';
 import MenuAuthModal from './menu-auth-modal.vue';
 import ButtonAuthModal from './button-auth-modal.vue';
 
 defineOptions({ name: 'RoleOperateDrawer' });
+
+const { startLoading, endLoading } = useLoading();
 
 interface Props {
   /** the type of operation */
@@ -41,28 +44,26 @@ const title = computed(() => {
   return titles[props.operateType];
 });
 
-type Model = Pick<Api.SystemManage.Role, 'roleName' | 'roleCode' | 'roleDesc' | 'status'>;
+type Model = Pick<Api.SystemManage.Role, 'name' | 'description' | 'status'>;
 
 const model = ref(createDefaultModel());
 
 function createDefaultModel(): Model {
   return {
-    roleName: '',
-    roleCode: '',
-    roleDesc: '',
+    name: '',
+    description: '',
     status: undefined
   };
 }
 
-type RuleKey = Exclude<keyof Model, 'roleDesc'>;
+type RuleKey = Exclude<keyof Model, 'description'>;
 
 const rules: Record<RuleKey, App.Global.FormRule> = {
-  roleName: defaultRequiredRule,
-  roleCode: defaultRequiredRule,
+  name: defaultRequiredRule,
   status: defaultRequiredRule
 };
 
-const roleId = computed(() => props.rowData?.id || -1);
+const roleId = computed(() => props.rowData?.id || '');
 
 const isEdit = computed(() => props.operateType === 'edit');
 
@@ -81,9 +82,22 @@ function closeDrawer() {
 async function handleSubmit() {
   await validate();
   // request
-  window.$message?.success($t('common.updateSuccess'));
-  closeDrawer();
-  emit('submitted');
+  startLoading();
+
+  const { error } =
+    props.operateType === 'add'
+      ? await createRole(model.value as Api.SystemManage.Role)
+      : await updateRole(roleId.value, model.value as Api.SystemManage.Role);
+
+  if (!error) {
+    window.$message?.success(props.operateType === 'add' ? $t('common.addSuccess') : $t('common.updateSuccess'));
+    closeDrawer();
+    emit('submitted');
+  } else {
+    window.$message?.error(props.operateType === 'add' ? $t('common.addFailed') : $t('common.updateFailed'));
+  }
+
+  endLoading();
 }
 
 watch(visible, () => {
@@ -95,21 +109,18 @@ watch(visible, () => {
 </script>
 
 <template>
-  <ElDrawer v-model="visible" :title="title" :size="360">
-    <ElForm ref="formRef" :model="model" :rules="rules" label-position="top">
-      <ElFormItem :label="$t('page.manage.role.roleName')" prop="roleName">
-        <ElInput v-model="model.roleName" :placeholder="$t('page.manage.role.form.roleName')" />
-      </ElFormItem>
-      <ElFormItem :label="$t('page.manage.role.roleCode')" prop="roleCode">
-        <ElInput v-model="model.roleCode" :placeholder="$t('page.manage.role.form.roleCode')" />
+  <ElDialog v-model="visible" :title="title" draggable preset="card" class="w-800px">
+    <ElForm ref="formRef" :model="model" :rules="rules" label-position="right" :label-width="100">
+      <ElFormItem :label="$t('page.manage.role.roleName')" prop="name">
+        <ElInput v-model="model.name" :placeholder="$t('page.manage.role.form.roleName')" />
       </ElFormItem>
       <ElFormItem :label="$t('page.manage.role.roleStatus')" prop="status">
         <ElRadioGroup v-model="model.status">
           <ElRadio v-for="{ label, value } in enableStatusOptions" :key="value" :value="value" :label="$t(label)" />
         </ElRadioGroup>
       </ElFormItem>
-      <ElFormItem :label="$t('page.manage.role.roleDesc')" prop="roleDesc">
-        <ElInput v-model="model.roleDesc" :placeholder="$t('page.manage.role.form.roleDesc')" />
+      <ElFormItem :label="$t('page.manage.role.roleDesc')" prop="description">
+        <ElInput v-model="model.description" :placeholder="$t('page.manage.role.form.roleDesc')" />
       </ElFormItem>
     </ElForm>
     <ElSpace v-if="isEdit">
@@ -124,7 +135,7 @@ watch(visible, () => {
         <ElButton type="primary" @click="handleSubmit">{{ $t('common.confirm') }}</ElButton>
       </ElSpace>
     </template>
-  </ElDrawer>
+  </ElDialog>
 </template>
 
 <style scoped></style>

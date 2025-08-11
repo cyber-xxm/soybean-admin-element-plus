@@ -62,12 +62,12 @@ export function getTabIdByRoute(route: App.Global.TabRoute) {
 export function getTabByRoute(route: App.Global.TabRoute) {
   const { name, path, fullPath = path, meta } = route;
 
-  const { title, i18nKey, fixedIndexInTab } = meta;
+  const { title, i18n_key, fixedIndexInTab } = meta;
 
   // Get icon and localIcon from getRouteIcons function
   const { icon, localIcon } = getRouteIcons(route);
 
-  const label = i18nKey ? $t(i18nKey) : title;
+  const label = i18n_key ? $t(i18n_key) : title;
 
   const tab: App.Global.Tab = {
     id: getTabIdByRoute(route),
@@ -78,7 +78,7 @@ export function getTabByRoute(route: App.Global.TabRoute) {
     fixedIndex: fixedIndexInTab,
     icon,
     localIcon,
-    i18nKey
+    i18nKey: i18n_key
   };
 
   return tab;
@@ -204,12 +204,10 @@ export function getFixedTabIds(tabs: App.Global.Tab[]) {
  * @param tabs
  */
 function updateTabsLabel(tabs: App.Global.Tab[]) {
-  const updated = tabs.map(tab => ({
+  return tabs.map(tab => ({
     ...tab,
     label: tab.newLabel || tab.oldLabel || tab.label
   }));
-
-  return updated;
 }
 
 /**

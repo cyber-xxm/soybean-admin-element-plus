@@ -2,11 +2,11 @@
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useLoading } from '@sa/hooks';
-import { $t } from '@/locales';
 import { useAppStore } from '@/store/modules/app';
 import { useAuthStore } from '@/store/modules/auth';
 import { useTabStore } from '@/store/modules/tab';
 import { useAuth } from '@/hooks/business/auth';
+import { $t } from '@/locales';
 
 defineOptions({ name: 'ToggleAuth' });
 
@@ -22,7 +22,7 @@ type AccountKey = 'super' | 'admin' | 'user';
 interface Account {
   key: AccountKey;
   label: string;
-  userName: string;
+  username: string;
   password: string;
 }
 
@@ -30,19 +30,19 @@ const accounts = computed<Account[]>(() => [
   {
     key: 'super',
     label: $t('page.login.pwdLogin.superAdmin'),
-    userName: 'Super',
+    username: 'Super',
     password: '123456'
   },
   {
     key: 'admin',
     label: $t('page.login.pwdLogin.admin'),
-    userName: 'Admin',
+    username: 'Admin',
     password: '123456'
   },
   {
     key: 'user',
     label: $t('page.login.pwdLogin.user'),
-    userName: 'User',
+    username: 'User',
     password: '123456'
   }
 ]);
@@ -53,7 +53,7 @@ async function handleToggleAccount(account: Account) {
   loginAccount.value = account.key;
 
   startLoading();
-  await authStore.login(account.userName, account.password, false);
+  await authStore.login(account.username, account.password, false);
   tabStore.initTabStore(route);
   endLoading();
   appStore.reloadPage();

@@ -1,9 +1,9 @@
 <script setup lang="tsx">
 import { ElButton, ElPopconfirm, ElTag } from 'element-plus';
-import { fetchGetUserList } from '@/service/api';
-import { $t } from '@/locales';
 import { enableStatusRecord, userGenderRecord } from '@/constants/business';
+import { deleteUser, fetchGetUserList } from '@/service/api';
 import { useTable, useTableOperate } from '@/hooks/common/table';
+import { $t } from '@/locales';
 import UserOperateDrawer from './modules/user-operate-drawer.vue';
 import UserSearch from './modules/user-search.vue';
 
@@ -12,7 +12,7 @@ defineOptions({ name: 'UserManage' });
 const {
   columns,
   columnChecks,
-  data,
+  list,
   getData,
   getDataByPage,
   loading,
@@ -24,24 +24,24 @@ const {
   showTotal: true,
   apiParams: {
     current: 1,
-    size: 10,
+    page_size: 10,
     status: undefined,
-    userName: undefined,
-    userGender: undefined,
-    nickName: undefined,
-    userPhone: undefined,
-    userEmail: undefined
+    username: undefined,
+    gender: undefined,
+    name: undefined,
+    phone: undefined,
+    email: undefined
   },
   columns: () => [
     { type: 'selection', width: 48 },
     { prop: 'index', label: $t('common.index'), width: 64 },
-    { prop: 'userName', label: $t('page.manage.user.userName'), minWidth: 100 },
+    { prop: 'username', label: $t('page.manage.user.username'), minWidth: 100 },
     {
-      prop: 'userGender',
+      prop: 'gender',
       label: $t('page.manage.user.userGender'),
       width: 100,
       formatter: row => {
-        if (row.userGender === undefined) {
+        if (row.gender === undefined) {
           return '';
         }
 
@@ -50,14 +50,14 @@ const {
           2: 'danger'
         };
 
-        const label = $t(userGenderRecord[row.userGender]);
+        const label = $t(userGenderRecord[row.gender]);
 
-        return <ElTag type={tagMap[row.userGender]}>{label}</ElTag>;
+        return <ElTag type={tagMap[row.gender]}>{label}</ElTag>;
       }
     },
-    { prop: 'nickName', label: $t('page.manage.user.nickName'), minWidth: 100 },
-    { prop: 'userPhone', label: $t('page.manage.user.userPhone'), width: 120 },
-    { prop: 'userEmail', label: $t('page.manage.user.userEmail'), minWidth: 200 },
+    { prop: 'name', label: $t('page.manage.user.nickName'), minWidth: 100 },
+    { prop: 'phone', label: $t('page.manage.user.userPhone'), width: 120 },
+    { prop: 'email', label: $t('page.manage.user.userEmail'), minWidth: 200 },
     {
       prop: 'status',
       label: $t('page.manage.user.userStatus'),
@@ -111,25 +111,32 @@ const {
   onBatchDeleted,
   onDeleted
   // closeDrawer
-} = useTableOperate(data, getData);
+} = useTableOperate(list, getData);
 
 async function handleBatchDelete() {
   // eslint-disable-next-line no-console
   console.log(checkedRowKeys.value);
   // request
-
-  onBatchDeleted();
+  const rows = checkedRowKeys.value;
+  rows.forEach(id => {
+    handleDelete(id);
+  });
+  await onBatchDeleted();
 }
 
-function handleDelete(id: number) {
-  // eslint-disable-next-line no-console
-  console.log(id);
+async function handleDelete(id: string) {
   // request
+  const { error } = await deleteUser(id);
 
-  onDeleted();
+  if (!error) {
+    window.$message?.success($t('common.deleteSuccess'));
+    await onDeleted();
+  } else {
+    window.$message?.error($t('common.deleteFailed'));
+  }
 }
 
-function edit(id: number) {
+function edit(id: string) {
   handleEdit(id);
 }
 </script>
@@ -157,7 +164,7 @@ function edit(id: number) {
           height="100%"
           border
           class="sm:h-full"
-          :data="data"
+          :data="list"
           row-key="id"
           @selection-change="checkedRowKeys = $event"
         >

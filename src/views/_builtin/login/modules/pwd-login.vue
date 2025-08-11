@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { $t } from '@/locales';
 import { loginModuleRecord } from '@/constants/app';
+import { useAuthStore } from '@/store/modules/auth';
 import { useRouterPush } from '@/hooks/common/router';
 import { useForm, useFormRules } from '@/hooks/common/form';
-import { useAuthStore } from '@/store/modules/auth';
+import { $t } from '@/locales';
 
 defineOptions({ name: 'PwdLogin' });
 
@@ -13,12 +13,12 @@ const { toggleLoginModule } = useRouterPush();
 const { formRef, validate } = useForm();
 
 interface FormModel {
-  userName: string;
+  username: string;
   password: string;
 }
 
 const model = ref<FormModel>({
-  userName: 'Soybean',
+  username: 'admin',
   password: '123456'
 });
 
@@ -27,14 +27,14 @@ const rules = computed<Record<keyof FormModel, App.Global.FormRule[]>>(() => {
   const { formRules } = useFormRules();
 
   return {
-    userName: formRules.userName,
+    username: formRules.username,
     password: formRules.pwd
   };
 });
 
 async function handleSubmit() {
   await validate();
-  await authStore.login(model.value.userName, model.value.password);
+  await authStore.login(model.value.username, model.value.password);
 }
 
 type AccountKey = 'super' | 'admin' | 'user';
@@ -42,7 +42,7 @@ type AccountKey = 'super' | 'admin' | 'user';
 interface Account {
   key: AccountKey;
   label: string;
-  userName: string;
+  username: string;
   password: string;
 }
 
@@ -50,32 +50,32 @@ const accounts = computed<Account[]>(() => [
   {
     key: 'super',
     label: $t('page.login.pwdLogin.superAdmin'),
-    userName: 'Super',
+    username: 'Super',
     password: '123456'
   },
   {
     key: 'admin',
     label: $t('page.login.pwdLogin.admin'),
-    userName: 'Admin',
+    username: 'Admin',
     password: '123456'
   },
   {
     key: 'user',
     label: $t('page.login.pwdLogin.user'),
-    userName: 'User',
+    username: 'User',
     password: '123456'
   }
 ]);
 
 async function handleAccountLogin(account: Account) {
-  await authStore.login(account.userName, account.password);
+  await authStore.login(account.username, account.password);
 }
 </script>
 
 <template>
   <ElForm ref="formRef" :model="model" :rules="rules" size="large" :show-label="false" @keyup.enter="handleSubmit">
-    <ElFormItem prop="userName">
-      <ElInput v-model="model.userName" :placeholder="$t('page.login.common.userNamePlaceholder')" />
+    <ElFormItem prop="username">
+      <ElInput v-model="model.username" :placeholder="$t('page.login.common.usernamePlaceholder')" />
     </ElFormItem>
     <ElFormItem prop="password">
       <ElInput

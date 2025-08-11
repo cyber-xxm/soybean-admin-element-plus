@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { $t } from '@/locales';
 import { enableStatusOptions } from '@/constants/business';
-import { translateOptions } from '@/utils/common';
+import { translateNumberOptions } from '@/utils/common';
+import { $t } from '@/locales';
 
 defineOptions({ name: 'RoleSearch' });
 
@@ -32,21 +32,16 @@ function search() {
       <ElCollapseItem :title="$t('common.search')" name="role-search">
         <ElForm :model="model" label-position="right" :label-width="80">
           <ElRow :gutter="24">
-            <ElCol :lg="6" :md="8" :sm="12">
+            <ElCol :lg="9" :md="8" :sm="12">
               <ElFormItem :label="$t('page.manage.role.roleName')" prop="roleName">
-                <ElInput v-model="model.roleName" :placeholder="$t('page.manage.role.form.roleName')" />
+                <ElInput v-model="model.name" clearable :placeholder="$t('page.manage.role.form.roleName')" />
               </ElFormItem>
             </ElCol>
-            <ElCol :lg="6" :md="8" :sm="12">
-              <ElFormItem :label="$t('page.manage.role.roleCode')" prop="roleCode">
-                <ElInput v-model="model.roleCode" :placeholder="$t('page.manage.role.form.roleCode')" />
-              </ElFormItem>
-            </ElCol>
-            <ElCol :lg="6" :md="8" :sm="12">
+            <ElCol :lg="9" :md="8" :sm="12">
               <ElFormItem :label="$t('page.manage.role.roleStatus')" prop="status">
                 <ElSelect v-model="model.status" :placeholder="$t('page.manage.role.form.roleStatus')" clearable>
                   <ElOption
-                    v-for="{ label, value } in translateOptions(enableStatusOptions)"
+                    v-for="{ label, value } in translateNumberOptions(enableStatusOptions)"
                     :key="value"
                     :label="label"
                     :value="value"
