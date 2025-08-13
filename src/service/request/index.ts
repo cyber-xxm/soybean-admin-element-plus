@@ -106,6 +106,10 @@ export const request = createFlatRequest<App.Service.Response, RequestInstanceSt
       return response.data.data;
     },
     onError(error) {
+      const { request: responseURL } = error;
+      if (responseURL && responseURL.includes('health')) {
+        return;
+      }
       // when the request is fail, you can show error message
 
       let message = error.message;

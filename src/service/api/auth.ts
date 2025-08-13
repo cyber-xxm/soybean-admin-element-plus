@@ -1,5 +1,13 @@
 import { request } from '../request';
 
+/** Check web server health */
+export function checkHealth() {
+  return request<boolean>({
+    url: '/health',
+    method: 'get'
+  });
+}
+
 /**
  * Login
  *
